@@ -89,22 +89,27 @@ def compute(cfg: dict, today: date | None = None) -> dict:
     }
 
 
+# No icon. The hourglass was an emoji and Alex doesn't want emoji anywhere (2026-08-06).
+# U+29D7 ⧗ is a genuine monochrome hourglass and would have been the elegant answer, but
+# font coverage for it is thin and this string ends up in an iMessage — a tofu box is worse
+# than no glyph at all. The geometric shapes used on the Week Shape calendar are safe by
+# comparison (U+25CB/25D0/25CF/25C6 ship in essentially every font); this one isn't.
 def fmt_default(s: dict) -> str:
     return (
-        f"⏳ {s['years_left']}y {s['days_remainder']}d left "
+        f"{s['years_left']}y {s['days_remainder']}d left "
         f"· {s['weeks_left']:,} Saturdays "
         f"· {s['pct_spent']}% spent"
     )
 
 
 def fmt_statusline(s: dict) -> str:
-    return f"⏳ {s['years_left']}y {s['days_remainder']}d · {s['pct_spent']}%"
+    return f"{s['years_left']}y {s['days_remainder']}d · {s['pct_spent']}%"
 
 
 def fmt_long(s: dict) -> str:
     return "\n".join(
         [
-            f"⏳ {s['years_left']} years, {s['days_remainder']} days left "
+            f"{s['years_left']} years, {s['days_remainder']} days left "
             f"(to {s['expected_end']}, at {s['life_expectancy']}).",
             f"   {s['days_left']:,} days · {s['weeks_left']:,} weeks · "
             f"{s['summers_left']} more summers.",

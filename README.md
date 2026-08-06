@@ -8,15 +8,15 @@ Alex asked for a daily version of it. This is that number, in two places.
 
 ```
 $ left
-⏳ 43y 187d left · 2,270 Saturdays · 46.3% spent
+48y 187d left · 2,531 Saturdays · 43.6% spent
 
 $ left --statusline
-⏳ 43y 187d · 46.3%
+48y 187d · 43.6%
 
 $ left --long
-⏳ 43 years, 187 days left (to 2070-02-09, at 81).
-   15,893 days · 2,270 weeks · 43 more summers.
-   46.3% of the whole thing is behind you. 30.9% of your adult life.
+48 years, 187 days left (to 2075-02-09, at 86).
+   17,719 days · 2,531 weeks · 48 more summers.
+   43.6% of the whole thing is behind you. 28.7% of your adult life.
 ```
 
 ## Config
@@ -24,15 +24,31 @@ $ left --long
 `~/.config/left/config.json`
 
 ```json
-{"birthdate": "1989-02-09", "life_expectancy": 81, "adulthood_starts": 18}
+{"birthdate": "1989-02-09", "life_expectancy": 86, "adulthood_starts": 18}
 ```
 
 Birthdate verified 2026-08-06 against three macOS Contacts sources (all agree:
-1989-02-09). **`life_expectancy` is 81 because that is the number the `Left` app
-used and the one Alex already reacted to** — it reproduces his "just over 43
-years left" exactly. It is not an actuarial estimate and should not be quietly
-"corrected" into one; changing it changes the number he anchored on, so ask
-first.
+1989-02-09).
+
+**`life_expectancy` is 86, set 2026-08-06 after a full actuarial workup.** It
+shipped at 81 — the `Left` app's number — and Alex asked for a real estimate.
+Full brief with sources: `Claude/Output/Ad Hoc/2026-08-06 Life Expectancy —
+Actuarial Brief.md`. Two things worth carrying:
+
+- **81 was not wrong, it was unpersonalised.** SSA's *cohort* table for the 1989
+  male birth cohort gives 81.49 — the app is using a correct population baseline.
+  The widely-quoted "78" is a *period* table, which assumes mortality freezes at
+  2023 rates; that's a 3.25-year understatement at age 37 before anything else.
+- **The personal adjustment is +5, not +10.** Income and fitness overlap by ~72%
+  (Whitehall II) — stacking them naively double-counts one advantage.
+
+Honest band is 84–89. Do not chase precision here; treat 86 as "mid-to-high 80s".
+
+**The mean is not the interesting number.** Median is 89.5, p10 is 66, p90 is
+102 — a 36-year spread. The countdown shows a mean because a countdown needs a
+single number, not because a single number is true. An odds line (74% chance of
+seeing 80, 48% of seeing 90) was proposed and **declined 2026-08-06 as too much
+text for a status bar** — don't re-add it.
 
 ## Where it shows up
 
