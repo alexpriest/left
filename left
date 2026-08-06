@@ -1,0 +1,132 @@
+#!/usr/bin/env python3
+"""left — how much time is left.
+
+Born from a 2026-08-05 voice memo: the `Left` app's death countdown landed hard
+("almost halfway. Which is rude.") and Alex asked for a daily version of it.
+
+Usage:
+    left                 one line, the daily reminder
+    left --statusline    ultra-compact, for a Claude Code status bar
+    left --json          raw numbers
+    left --long          the full read, with the adulthood fraction
+
+Config: ~/.config/left/config.json
+    {"birthdate": "1989-02-09", "life_expectancy": 81, "adulthood_starts": 18}
+"""
+
+from __future__ import annotations
+
+import json
+import sys
+from datetime import date
+from pathlib import Path
+
+CONFIG_PATH = Path.home() / ".config" / "left" / "config.json"
+
+DEFAULTS = {
+    "birthdate": "1989-02-09",
+    "life_expectancy": 81,
+    "adulthood_starts": 18,
+}
+
+
+def load_config() -> dict:
+    cfg = dict(DEFAULTS)
+    if CONFIG_PATH.exists():
+        try:
+            cfg.update(json.loads(CONFIG_PATH.read_text()))
+        except (json.JSONDecodeError, OSError) as e:
+            print(f"left: bad config at {CONFIG_PATH}: {e}", file=sys.stderr)
+    return cfg
+
+
+def add_years(d: date, years: int) -> date:
+    """Same calendar day, N years on. Feb 29 lands on Mar 1 in a common year."""
+    try:
+        return d.replace(year=d.year + years)
+    except ValueError:
+        return d.replace(year=d.year + years, month=3, day=1)
+
+
+def split_span(start: date, end: date) -> tuple[int, int]:
+    """Whole years plus leftover days between two dates."""
+    years = end.year - start.year
+    if add_years(start, years) > end:
+        years -= 1
+    return years, (end - add_years(start, years)).days
+
+
+def compute(cfg: dict, today: date | None = None) -> dict:
+    today = today or date.today()
+    born = date.fromisoformat(cfg["birthdate"])
+    end = add_years(born, int(cfg["life_expectancy"]))
+    adult = add_years(born, int(cfg["adulthood_starts"]))
+
+    days_left = (end - today).days
+    days_lived = (today - born).days
+    total_days = (end - born).days
+
+    years_left, days_rem = split_span(today, end)
+    age_years, _ = split_span(born, today)
+
+    adult_total = (end - adult).days
+    adult_done = (today - adult).days
+
+    return {
+        "birthdate": born.isoformat(),
+        "expected_end": end.isoformat(),
+        "life_expectancy": int(cfg["life_expectancy"]),
+        "age_years": age_years,
+        "days_left": days_left,
+        "years_left": years_left,
+        "days_remainder": days_rem,
+        "weeks_left": days_left // 7,
+        "months_left": round(days_left / 30.44),
+        "pct_spent": round(days_lived / total_days * 100, 1),
+        "pct_left": round(days_left / total_days * 100, 1),
+        "adult_pct_spent": round(adult_done / adult_total * 100, 1),
+        "summers_left": days_left // 365,
+    }
+
+
+def fmt_default(s: dict) -> str:
+    return (
+        f"⏳ {s['years_left']}y {s['days_remainder']}d left "
+        f"· {s['weeks_left']:,} Saturdays "
+        f"· {s['pct_spent']}% spent"
+    )
+
+
+def fmt_statusline(s: dict) -> str:
+    return f"⏳ {s['years_left']}y {s['days_remainder']}d · {s['pct_spent']}%"
+
+
+def fmt_long(s: dict) -> str:
+    return "\n".join(
+        [
+            f"⏳ {s['years_left']} years, {s['days_remainder']} days left "
+            f"(to {s['expected_end']}, at {s['life_expectancy']}).",
+            f"   {s['days_left']:,} days · {s['weeks_left']:,} weeks · "
+            f"{s['summers_left']} more summers.",
+            f"   {s['pct_spent']}% of the whole thing is behind you. "
+            f"{s['adult_pct_spent']}% of your adult life.",
+        ]
+    )
+
+
+def main() -> int:
+    args = set(sys.argv[1:])
+    s = compute(load_config())
+    if "--json" in args:
+        print(json.dumps(s, indent=2))
+    elif "--statusline" in args:
+        print(fmt_statusline(s))
+    elif "--long" in args:
+        print(fmt_long(s))
+    else:
+        print(fmt_default(s))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
