@@ -21,18 +21,40 @@ $ left --long
 
 ## Icons
 
-No emoji, anywhere. **`--statusline` carries `⧗` (U+29D7 BLACK HOURGLASS); nothing
-else does**, and the split is deliberate.
+No emoji, anywhere. **`--statusline` carries `▽`; nothing else does.**
 
-A cmap scan of all 615 font files on this Mac found U+29D7 in exactly **three**:
-Apple Symbols, STIXGeneral, STIXTwoMath. For comparison, U+25CB `○` is in 123.
-Apple Symbols is a macOS system fallback and always present, so `⧗` renders
-reliably in a terminal here — and `--statusline` only ever appears on Alex's own
-Mac. Every other output reaches iMessage and possibly non-Apple renderers, where
-three-font coverage is a genuine tofu risk. A broken box is worse than no glyph.
+### ⚠️ Existence is not the test. Metrics are.
 
-If you ever want a glyph on the daily line, use a shape from the `○ ◐ ● ◆` family
-(the one the Week Shape calendar uses) — universal coverage, no emoji variants.
+This shipped first as `⧗` (U+29D7 BLACK HOURGLASS) on the strength of a cmap scan
+showing it present on this Mac — 3 fonts: Apple Symbols, STIXGeneral, STIXTwoMath.
+It rendered, and it sat visibly misaligned in the status bar, because **all three
+are proportional fonts and the terminal is monospace.** Every draw was a
+foreign-width fallback.
+
+Rescanning **monospace fonts only**: `⧗` is in **0 of the 42** on this machine.
+No hourglass exists in any monospace font at all.
+
+The question was never "does this glyph exist." It was "does this glyph exist in a
+font with the terminal's metrics."
+
+### Rejected: the fill-level dial
+
+The elegant version would have been `○ ◔ ◑ ◕ ●` tracking `pct_spent` — a live
+progress dial in one character, matching the Week Shape calendar's fill language.
+JetBrains Mono Regular (Alex's Ghostty font, `~/.config/ghostty/config`) carries
+`◔ ◕ ●` but **not `○` or `◑`** — and half is exactly where he is now. The gauge
+would have broken at its most-used value. Checked before building.
+
+### Why ▽
+
+Metric-native in JetBrains Mono. It's the lower bulb of an hourglass, so it still
+reads as draining. And it doesn't collide with the `◆` already meaning Client Day
+on the Week Shape calendar.
+
+Other metric-safe options in JetBrains Mono if this palls: `◔ ▫ • ◆`.
+
+**The daily line stays bare** — it reaches iMessage, where none of the above
+reasoning holds.
 
 ## Config
 

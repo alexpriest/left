@@ -91,16 +91,27 @@ def compute(cfg: dict, today: date | None = None) -> dict:
 
 # Icon policy, and it differs by destination on purpose (settled 2026-08-06).
 #
-# No emoji anywhere — Alex's standing preference. U+29D7 ⧗ BLACK HOURGLASS is the
-# monochrome alternative, and a cmap scan of all 615 font files on this Mac found it in
-# exactly THREE: Apple Symbols, STIXGeneral, STIXTwoMath. Compare U+25CB ○ at 123 fonts.
+# No emoji anywhere — Alex's standing preference.
 #
-# Apple Symbols is a macOS system fallback and always present, so ⧗ renders reliably in a
-# terminal here — hence it's fine in --statusline, which only ever appears on his own Mac.
-# Everything else (the daily line, the briefing) reaches iMessage and potentially non-Apple
-# renderers, where three-font coverage is a real tofu risk. A broken box is worse than no
-# glyph, so those stay bare.
-HOURGLASS = "⧗"
+# ⚠️ EXISTENCE IS NOT THE TEST. METRICS ARE. I first shipped U+29D7 ⧗ BLACK HOURGLASS here
+# because a cmap scan found it present on this Mac (3 fonts: Apple Symbols, STIXGeneral,
+# STIXTwoMath). It rendered — and sat visibly misaligned, because all three are PROPORTIONAL
+# and the terminal is monospace, so every draw was a foreign-width fallback. Rescanning
+# monospace fonts only: ⧗ is in ZERO of the 42 on this machine. No hourglass exists in any
+# monospace font. The right question was never "does the glyph exist" but "does the glyph
+# exist in a font with the terminal's metrics."
+#
+# Also checked and rejected: a fill-level dial (○ ◔ ◑ ◕ ●) tracking pct_spent, which would
+# have been the elegant version. JetBrains Mono Regular — Alex's Ghostty font — carries
+# ◔ ◕ ● but NOT ○ or ◑, and half is exactly where he currently is. The gauge would have
+# broken at its most-used value.
+#
+# ▽ is the pick: metric-native in JetBrains Mono, it's the lower bulb of an hourglass so it
+# still reads as draining, and it doesn't collide with the ◆ already used for Client Day on
+# the Week Shape calendar.
+#
+# Statusline only. The daily line reaches iMessage, where none of this reasoning holds.
+HOURGLASS = "▽"
 
 
 def fmt_default(s: dict) -> str:
