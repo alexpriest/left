@@ -115,20 +115,27 @@ def compute(cfg: dict, today: date | None = None) -> dict:
 # Corrected. Do not record a prediction as a verified result.)
 #
 # So: Block Elements. All 32 of U+2580–259F are present in JetBrains Mono — zero fallback
-# risk, guaranteed metric-native. The bar uses full blocks plus a partial eighth-block for
-# the fractional cell, giving 40 distinct states across a life where the dial had 5. It
-# moves about once a year instead of once a decade.
-EIGHTHS = "▏▎▍▌▋▊▉█"  # U+258F..U+2588, 1/8 through 8/8
-BAR_CELLS = 5
+# risk, guaranteed metric-native.
+#
+# ⚠️ THIRD ITERATION, and the failure was not a font problem this time. The first bar used
+# eighth-blocks (▏▎▍▌…) for sub-cell precision. At 44.1% that put a ▏ — a ONE-EIGHTH-WIDTH
+# sliver — between the filled and empty runs, and at 14pt a sliver does not read as "partial
+# fill", it reads as a GAP. The bar looked broken in the middle. Sub-cell precision is the
+# wrong idea in a bar this small, however correct the arithmetic.
+#
+# Whole cells only, and only the two glyphs already proven to render cleanly in Alex's
+# terminal: █ (U+2588) and ░ (U+2591). Both were visibly fine in the screenshot that killed
+# the sliver version — it was only the character between them that failed.
+#
+# 8 cells = 9 states. Coarser than the 41 the eighths gave, and that is the trade: a bar
+# that always looks like a bar beats one that encodes more and looks broken.
+BAR_CELLS = 8
 
 
 def bar(pct: float, cells: int = BAR_CELLS) -> str:
-    """A metric-native progress bar, precise to an eighth of a cell."""
-    exact = max(0.0, min(100.0, pct)) / 100 * cells
-    whole = int(exact)
-    eighth = int((exact - whole) * 8)
-    part = EIGHTHS[eighth - 1] if eighth else ""
-    return ("█" * whole + part).ljust(cells, "░")
+    """A metric-native progress bar. Whole cells only — no slivers."""
+    filled = round(max(0.0, min(100.0, pct)) / 100 * cells)
+    return "█" * filled + "░" * (cells - filled)
 
 
 def fmt_default(s: dict) -> str:

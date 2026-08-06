@@ -24,13 +24,12 @@ $ left --long
 No emoji, anywhere. **`--statusline` carries a progress bar; nothing else does.**
 
 ```
-  0%  ░░░░░        44.1%  ██▏░░        75%  ███▊░       100%  █████
+  0%  ░░░░░░░░      44.1%  ████░░░░      75%  ██████░░      100%  ████████
 ```
 
-Five cells with a partial eighth-block for the fractional cell — **41 distinct
-states across a life**, so it visibly moves about once a year. Built entirely from
-Block Elements (U+2580–259F), **all 32 of which JetBrains Mono maps**: zero
-fallback, guaranteed metric-native.
+Eight whole cells, two glyphs: `█` (U+2588) and `░` (U+2591). Both are in
+JetBrains Mono — zero fallback — and both are *proven* to render cleanly in Alex's
+terminal, which matters more than the font table (see below).
 
 **The daily line stays bare** — it reaches iMessage, where none of the font
 reasoning below holds.
@@ -62,18 +61,26 @@ then fontTools): JetBrains Mono Regular maps only **1,182 codepoints** and ships
 **39 of the 96 Geometric Shapes** — every triangle and square, plus `◆ ◇ ◊ ◎ ● ◔ ◕
 ◯`, but **not one of the eight half-filled circles** (`◐ ◑ ◒ ◓ ◖ ◗` all absent).
 
-### Alternative bars, all fully native
+**4. And then a failure that wasn't about fonts at all.** The first bar used
+eighth-blocks (`▏▎▍▌…`) for sub-cell precision — 41 states instead of 9, every
+glyph native, arithmetic correct. At 44.1% it rendered `██▏░░`, and that `▏` is a
+**one-eighth-width sliver**. At 14pt a sliver doesn't read as partial fill, it
+reads as a **gap**. The bar looked broken in the middle.
 
-```
-████░░░░           8-cell, whole blocks
-███▌░░░░           8-cell, eighth precision  (64 states)
-━━━━──────         10-cell heavy/light line, lower visual weight
-▓▓▓▓░░░░           8-cell shade, softer contrast
-[███░░░]           bracketed
-```
+> **Sub-cell precision is the wrong idea in a bar this small.** A bar that always
+> looks like a bar beats one that encodes more and looks broken.
 
-Change `BAR_CELLS`, or swap `█`/`░` in `bar()`. Verify any new glyph is in
-JetBrains Mono first — `~/.config/ghostty/config` names the font.
+Hence: whole cells, and only the two glyphs already *observed* rendering cleanly on
+Alex's screen rather than merely present in the font table. Nine states is coarse —
+it moves roughly every six years — and that is the accepted trade.
+
+### If it needs changing
+
+Change `BAR_CELLS` for resolution (10 or 12 still fits). Anything else — a
+different glyph, shades, brackets, a `━──` line — must be **looked at in the real
+status bar before it's called done.** That is the one step this file exists to
+enforce; four of the five iterations here passed every check I could run in a
+terminal and still failed on screen.
 
 ## Config
 
