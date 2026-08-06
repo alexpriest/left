@@ -89,29 +89,37 @@ def compute(cfg: dict, today: date | None = None) -> dict:
     }
 
 
-# Icon policy, and it differs by destination on purpose (settled 2026-08-06).
+# Icon policy, statusline only. The daily line reaches iMessage, where none of the font
+# reasoning below holds — it stays bare. No emoji anywhere; that's a standing preference.
 #
-# No emoji anywhere — Alex's standing preference.
+# The statusline glyph is a DIAL: one character that fills as the life does. It is the same
+# fill-level language as the Week Shape calendar, and it means the countdown is something
+# you notice at a glance rather than a number you have to read.
 #
-# ⚠️ EXISTENCE IS NOT THE TEST. METRICS ARE. I first shipped U+29D7 ⧗ BLACK HOURGLASS here
-# because a cmap scan found it present on this Mac (3 fonts: Apple Symbols, STIXGeneral,
-# STIXTwoMath). It rendered — and sat visibly misaligned, because all three are PROPORTIONAL
-# and the terminal is monospace, so every draw was a foreign-width fallback. Rescanning
-# monospace fonts only: ⧗ is in ZERO of the 42 on this machine. No hourglass exists in any
-# monospace font. The right question was never "does the glyph exist" but "does the glyph
-# exist in a font with the terminal's metrics."
+# ⚠️ EXISTENCE IS NOT THE TEST. METRICS ARE. This first shipped U+29D7 ⧗ BLACK HOURGLASS on
+# the strength of a cmap scan showing it present on this Mac (3 fonts: Apple Symbols,
+# STIXGeneral, STIXTwoMath). It rendered, and sat visibly misaligned, because all three are
+# PROPORTIONAL and the terminal is monospace — every draw was a foreign-width fallback.
+# Rescanning monospace fonts only: ⧗ is in ZERO of the 42 here. No hourglass exists in any
+# monospace font at all.
 #
-# Also checked and rejected: a fill-level dial (○ ◔ ◑ ◕ ●) tracking pct_spent, which would
-# have been the elegant version. JetBrains Mono Regular — Alex's Ghostty font — carries
-# ◔ ◕ ● but NOT ○ or ◑, and half is exactly where he currently is. The gauge would have
-# broken at its most-used value.
+# ⚠️ AND THE CORRECTION TO THAT CORRECTION: a missing glyph is NOT automatically broken.
+# Ghostty falls back. ⧗ was doomed because *no* monospace font had it. ○ (U+25CB) and ◑
+# (U+25D1) are absent from JetBrains Mono — verified twice, it maps only 1,182 codepoints
+# and ships 39 of the 96 Geometric Shapes, including every triangle and square and ◆◇◊◎●◔◕◯
+# but not one of the eight half-filled circles — yet they ARE in Menlo, Andale Mono and
+# Courier New, so their fallback can land metric-correct. Two of these five glyphs are
+# fallbacks; Alex confirmed the row looks even. Do not "fix" them out on font-coverage
+# grounds alone.
 #
-# ▽ is the pick: metric-native in JetBrains Mono, it's the lower bulb of an hourglass so it
-# still reads as draining, and it doesn't collide with the ◆ already used for Client Day on
-# the Week Shape calendar.
-#
-# Statusline only. The daily line reaches iMessage, where none of this reasoning holds.
-HOURGLASS = "▽"
+# ◑ is the whole point of the design: it is what he sees today, and the memo that started
+# this was about being almost halfway.
+DIAL = ((12.5, "○"), (37.5, "◔"), (62.5, "◑"), (87.5, "◕"), (100.1, "●"))
+
+
+def dial(pct: float) -> str:
+    """The fill glyph for a percentage-spent, nearest quarter."""
+    return next(g for threshold, g in DIAL if pct < threshold)
 
 
 def fmt_default(s: dict) -> str:
@@ -123,7 +131,7 @@ def fmt_default(s: dict) -> str:
 
 
 def fmt_statusline(s: dict) -> str:
-    return f"{HOURGLASS} {s['years_left']}y {s['days_remainder']}d · {s['pct_spent']}%"
+    return f"{dial(s['pct_spent'])} {s['years_left']}y {s['days_remainder']}d · {s['pct_spent']}%"
 
 
 def fmt_long(s: dict) -> str:

@@ -19,42 +19,52 @@ $ left --long
    44.1% of the whole thing is behind you. 29.1% of your adult life.
 ```
 
-## Icons
+## The dial
 
-No emoji, anywhere. **`--statusline` carries `▽`; nothing else does.**
+No emoji, anywhere. **`--statusline` carries a fill dial; nothing else does.**
+
+```
+○  0–12.5%      ◔  12.5–37.5%      ◑  37.5–62.5%      ◕  62.5–87.5%      ●  87.5%+
+```
+
+One character that fills as the life does — same fill language as the Week Shape
+calendar. It makes the countdown something you *notice* rather than a number you
+have to read. `◑` is the state he's in now, and the memo that started all of this
+was about being almost halfway.
+
+**The daily line stays bare** — it reaches iMessage, where none of the font
+reasoning below holds.
 
 ### ⚠️ Existence is not the test. Metrics are.
 
-This shipped first as `⧗` (U+29D7 BLACK HOURGLASS) on the strength of a cmap scan
+This first shipped `⧗` (U+29D7 BLACK HOURGLASS) on the strength of a cmap scan
 showing it present on this Mac — 3 fonts: Apple Symbols, STIXGeneral, STIXTwoMath.
-It rendered, and it sat visibly misaligned in the status bar, because **all three
-are proportional fonts and the terminal is monospace.** Every draw was a
-foreign-width fallback.
+It rendered, and sat visibly misaligned, because **all three are proportional and
+the terminal is monospace.** Every draw was a foreign-width fallback. Rescanning
+**monospace only**: `⧗` is in **0 of 42**. No hourglass exists in any monospace
+font at all.
 
-Rescanning **monospace fonts only**: `⧗` is in **0 of the 42** on this machine.
-No hourglass exists in any monospace font at all.
+### ⚠️ And the correction to that correction: missing ≠ broken
 
-The question was never "does this glyph exist." It was "does this glyph exist in a
-font with the terminal's metrics."
+Ghostty falls back. `⧗` was doomed because *no* monospace font had it — that was a
+property of that glyph, not a general rule, and generalising it was an error.
 
-### Rejected: the fill-level dial
+`○` (U+25CB) and `◑` (U+25D1) are genuinely absent from JetBrains Mono — verified
+twice, with a hand-rolled cmap parser and then independently with fontTools. The
+font maps only **1,182 codepoints** and ships **39 of the 96 Geometric Shapes**:
+every triangle and square, plus `◆ ◇ ◊ ◎ ● ◔ ◕ ◯`, but **not one of the eight
+half-filled circles** (`◐ ◑ ◒ ◓ ◖ ◗` all absent). A curated subset, oddly shaped.
 
-The elegant version would have been `○ ◔ ◑ ◕ ●` tracking `pct_spent` — a live
-progress dial in one character, matching the Week Shape calendar's fill language.
-JetBrains Mono Regular (Alex's Ghostty font, `~/.config/ghostty/config`) carries
-`◔ ◕ ●` but **not `○` or `◑`** — and half is exactly where he is now. The gauge
-would have broken at its most-used value. Checked before building.
+But they *are* in Menlo, Andale Mono and Courier New, so the fallback lands
+metric-correct. **Two of the five dial glyphs are fallbacks and the row renders
+even** — confirmed visually 2026-08-06. Do not "fix" them out on font-coverage
+grounds alone; check how it actually looks first.
 
-### Why ▽
+### If the dial ever needs replacing
 
-Metric-native in JetBrains Mono. It's the lower bulb of an hourglass, so it still
-reads as draining. And it doesn't collide with the `◆` already meaning Client Day
-on the Week Shape calendar.
-
-Other metric-safe options in JetBrains Mono if this palls: `◔ ▫ • ◆`.
-
-**The daily line stays bare** — it reaches iMessage, where none of the above
-reasoning holds.
+Fully native in JetBrains Mono, no fallback: `◯ ◔ ◕ ● ◆ ▽ □ ◧ ■ ▫ •`. The square
+family (`□ ◧ ■`) is a complete three-state dial with no fallback at all, at the
+cost of the clock metaphor.
 
 ## Config
 
