@@ -89,11 +89,20 @@ def compute(cfg: dict, today: date | None = None) -> dict:
     }
 
 
-# No icon. The hourglass was an emoji and Alex doesn't want emoji anywhere (2026-08-06).
-# U+29D7 ⧗ is a genuine monochrome hourglass and would have been the elegant answer, but
-# font coverage for it is thin and this string ends up in an iMessage — a tofu box is worse
-# than no glyph at all. The geometric shapes used on the Week Shape calendar are safe by
-# comparison (U+25CB/25D0/25CF/25C6 ship in essentially every font); this one isn't.
+# Icon policy, and it differs by destination on purpose (settled 2026-08-06).
+#
+# No emoji anywhere — Alex's standing preference. U+29D7 ⧗ BLACK HOURGLASS is the
+# monochrome alternative, and a cmap scan of all 615 font files on this Mac found it in
+# exactly THREE: Apple Symbols, STIXGeneral, STIXTwoMath. Compare U+25CB ○ at 123 fonts.
+#
+# Apple Symbols is a macOS system fallback and always present, so ⧗ renders reliably in a
+# terminal here — hence it's fine in --statusline, which only ever appears on his own Mac.
+# Everything else (the daily line, the briefing) reaches iMessage and potentially non-Apple
+# renderers, where three-font coverage is a real tofu risk. A broken box is worse than no
+# glyph, so those stay bare.
+HOURGLASS = "⧗"
+
+
 def fmt_default(s: dict) -> str:
     return (
         f"{s['years_left']}y {s['days_remainder']}d left "
@@ -103,7 +112,7 @@ def fmt_default(s: dict) -> str:
 
 
 def fmt_statusline(s: dict) -> str:
-    return f"{s['years_left']}y {s['days_remainder']}d · {s['pct_spent']}%"
+    return f"{HOURGLASS} {s['years_left']}y {s['days_remainder']}d · {s['pct_spent']}%"
 
 
 def fmt_long(s: dict) -> str:

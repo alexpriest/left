@@ -8,30 +8,50 @@ Alex asked for a daily version of it. This is that number, in two places.
 
 ```
 $ left
-48y 187d left · 2,531 Saturdays · 43.6% spent
+47y 187d left · 2,479 Saturdays · 44.1% spent
 
 $ left --statusline
-48y 187d · 43.6%
+⧗ 47y 187d · 44.1%
 
 $ left --long
-48 years, 187 days left (to 2075-02-09, at 86).
-   17,719 days · 2,531 weeks · 48 more summers.
-   43.6% of the whole thing is behind you. 28.7% of your adult life.
+47 years, 187 days left (to 2074-02-09, at 85).
+   17,354 days · 2,479 weeks · 47 more summers.
+   44.1% of the whole thing is behind you. 29.1% of your adult life.
 ```
+
+## Icons
+
+No emoji, anywhere. **`--statusline` carries `⧗` (U+29D7 BLACK HOURGLASS); nothing
+else does**, and the split is deliberate.
+
+A cmap scan of all 615 font files on this Mac found U+29D7 in exactly **three**:
+Apple Symbols, STIXGeneral, STIXTwoMath. For comparison, U+25CB `○` is in 123.
+Apple Symbols is a macOS system fallback and always present, so `⧗` renders
+reliably in a terminal here — and `--statusline` only ever appears on Alex's own
+Mac. Every other output reaches iMessage and possibly non-Apple renderers, where
+three-font coverage is a genuine tofu risk. A broken box is worse than no glyph.
+
+If you ever want a glyph on the daily line, use a shape from the `○ ◐ ● ◆` family
+(the one the Week Shape calendar uses) — universal coverage, no emoji variants.
 
 ## Config
 
 `~/.config/left/config.json`
 
 ```json
-{"birthdate": "1989-02-09", "life_expectancy": 86, "adulthood_starts": 18}
+{"birthdate": "1989-02-09", "life_expectancy": 85, "adulthood_starts": 18}
 ```
 
 Birthdate verified 2026-08-06 against three macOS Contacts sources (all agree:
 1989-02-09).
 
-**`life_expectancy` is 86, set 2026-08-06 after a full actuarial workup.** It
-shipped at 81 — the `Left` app's number — and Alex asked for a real estimate.
+**`life_expectancy` is 85.** The actuarial workup (2026-08-06) put the honest
+point estimate at **86**, band 84–89 — but Alex set 85 deliberately, because
+**that is the closest the `Left` app's own toggles can get and he wants the two
+to agree.** Consistency across the two surfaces beat a one-year gain in accuracy,
+which is the right call for an instrument whose job is to be looked at daily.
+Do not "fix" it back to 86.
+
 Full brief with sources: `Claude/Output/Ad Hoc/2026-08-06 Life Expectancy —
 Actuarial Brief.md`. Two things worth carrying:
 
