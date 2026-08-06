@@ -19,52 +19,61 @@ $ left --long
    44.1% of the whole thing is behind you. 29.1% of your adult life.
 ```
 
-## The dial
+## The bar
 
-No emoji, anywhere. **`--statusline` carries a fill dial; nothing else does.**
+No emoji, anywhere. **`--statusline` carries a progress bar; nothing else does.**
 
 ```
-○  0–12.5%      ◔  12.5–37.5%      ◑  37.5–62.5%      ◕  62.5–87.5%      ●  87.5%+
+  0%  ░░░░░        44.1%  ██▏░░        75%  ███▊░       100%  █████
 ```
 
-One character that fills as the life does — same fill language as the Week Shape
-calendar. It makes the countdown something you *notice* rather than a number you
-have to read. `◑` is the state he's in now, and the memo that started all of this
-was about being almost halfway.
+Five cells with a partial eighth-block for the fractional cell — **41 distinct
+states across a life**, so it visibly moves about once a year. Built entirely from
+Block Elements (U+2580–259F), **all 32 of which JetBrains Mono maps**: zero
+fallback, guaranteed metric-native.
 
 **The daily line stays bare** — it reaches iMessage, where none of the font
 reasoning below holds.
 
-### ⚠️ Existence is not the test. Metrics are.
+### The three-step lesson, kept because I got it wrong twice
 
-This first shipped `⧗` (U+29D7 BLACK HOURGLASS) on the strength of a cmap scan
-showing it present on this Mac — 3 fonts: Apple Symbols, STIXGeneral, STIXTwoMath.
-It rendered, and sat visibly misaligned, because **all three are proportional and
-the terminal is monospace.** Every draw was a foreign-width fallback. Rescanning
-**monospace only**: `⧗` is in **0 of 42**. No hourglass exists in any monospace
-font at all.
+**1. Existence is not the test — metrics are.** This first shipped `⧗` (U+29D7
+BLACK HOURGLASS) on a cmap scan showing it present on this Mac: 3 fonts, Apple
+Symbols / STIXGeneral / STIXTwoMath. It rendered, and sat visibly misaligned,
+because all three are **proportional** and the terminal is monospace. Rescanning
+monospace only: `⧗` is in **0 of 42**. No hourglass exists in any monospace font.
 
-### ⚠️ And the correction to that correction: missing ≠ broken
+**2. I then over-generalised in the other direction.** I built a `○ ◔ ◑ ◕ ●` dial
+on the theory that a fallback *can* be metric-correct, since Menlo and Andale Mono
+carry the two glyphs JetBrains Mono lacks. **Tested, and it failed** — `◑` rendered
+misaligned exactly like `⧗`. The rule is stricter than I kept trying to make it:
 
-Ghostty falls back. `⧗` was doomed because *no* monospace font had it — that was a
-property of that glyph, not a general rule, and generalising it was an error.
+> **A fallback glyph is a misaligned glyph. Only use codepoints the terminal's own
+> font actually maps.**
 
-`○` (U+25CB) and `◑` (U+25D1) are genuinely absent from JetBrains Mono — verified
-twice, with a hand-rolled cmap parser and then independently with fontTools. The
-font maps only **1,182 codepoints** and ships **39 of the 96 Geometric Shapes**:
-every triangle and square, plus `◆ ◇ ◊ ◎ ● ◔ ◕ ◯`, but **not one of the eight
-half-filled circles** (`◐ ◑ ◒ ◓ ◖ ◗` all absent). A curated subset, oddly shaped.
+**3. ⚠️ I recorded a prediction as a verified result.** This file previously said
+*"Two of the five dial glyphs are fallbacks and the row renders even — confirmed
+visually."* Alex had said *"let's try B and see how it looks."* That is an
+experiment, not a confirmation, and writing it up as one is the failure mode in
+`feedback_critiquing_alex`. **Never log an untested expectation as a finding.**
 
-But they *are* in Menlo, Andale Mono and Courier New, so the fallback lands
-metric-correct. **Two of the five dial glyphs are fallbacks and the row renders
-even** — confirmed visually 2026-08-06. Do not "fix" them out on font-coverage
-grounds alone; check how it actually looks first.
+The font fact itself held up under two independent checks (hand-rolled cmap parser,
+then fontTools): JetBrains Mono Regular maps only **1,182 codepoints** and ships
+**39 of the 96 Geometric Shapes** — every triangle and square, plus `◆ ◇ ◊ ◎ ● ◔ ◕
+◯`, but **not one of the eight half-filled circles** (`◐ ◑ ◒ ◓ ◖ ◗` all absent).
 
-### If the dial ever needs replacing
+### Alternative bars, all fully native
 
-Fully native in JetBrains Mono, no fallback: `◯ ◔ ◕ ● ◆ ▽ □ ◧ ■ ▫ •`. The square
-family (`□ ◧ ■`) is a complete three-state dial with no fallback at all, at the
-cost of the clock metaphor.
+```
+████░░░░           8-cell, whole blocks
+███▌░░░░           8-cell, eighth precision  (64 states)
+━━━━──────         10-cell heavy/light line, lower visual weight
+▓▓▓▓░░░░           8-cell shade, softer contrast
+[███░░░]           bracketed
+```
+
+Change `BAR_CELLS`, or swap `█`/`░` in `bar()`. Verify any new glyph is in
+JetBrains Mono first — `~/.config/ghostty/config` names the font.
 
 ## Config
 

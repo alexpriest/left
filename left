@@ -103,23 +103,32 @@ def compute(cfg: dict, today: date | None = None) -> dict:
 # Rescanning monospace fonts only: ⧗ is in ZERO of the 42 here. No hourglass exists in any
 # monospace font at all.
 #
-# ⚠️ AND THE CORRECTION TO THAT CORRECTION: a missing glyph is NOT automatically broken.
-# Ghostty falls back. ⧗ was doomed because *no* monospace font had it. ○ (U+25CB) and ◑
-# (U+25D1) are absent from JetBrains Mono — verified twice, it maps only 1,182 codepoints
-# and ships 39 of the 96 Geometric Shapes, including every triangle and square and ◆◇◊◎●◔◕◯
-# but not one of the eight half-filled circles — yet they ARE in Menlo, Andale Mono and
-# Courier New, so their fallback can land metric-correct. Two of these five glyphs are
-# fallbacks; Alex confirmed the row looks even. Do not "fix" them out on font-coverage
-# grounds alone.
+# ⚠️ THE FALLBACK THEORY WAS TESTED AND FAILED. After ⧗ I built a ○◔◑◕● dial, reasoning
+# that ○/◑ (absent from JetBrains Mono) would fall back cleanly because Menlo and Andale
+# Mono do have them. They did not — ◑ rendered visibly misaligned, same as ⧗. So the rule
+# is simpler and stricter than I kept trying to make it: A FALLBACK GLYPH IS A MISALIGNED
+# GLYPH. Only use codepoints the terminal's own font actually maps.
 #
-# ◑ is the whole point of the design: it is what he sees today, and the memo that started
-# this was about being almost halfway.
-DIAL = ((12.5, "○"), (37.5, "◔"), (62.5, "◑"), (87.5, "◕"), (100.1, "●"))
+# (I also wrote "Alex confirmed the row looks even" into the README on the strength of him
+# saying "let's try B and see how it looks." That is not confirmation, it's an experiment,
+# and turning one into the other is the exact failure mode logged in feedback_critiquing_alex.
+# Corrected. Do not record a prediction as a verified result.)
+#
+# So: Block Elements. All 32 of U+2580–259F are present in JetBrains Mono — zero fallback
+# risk, guaranteed metric-native. The bar uses full blocks plus a partial eighth-block for
+# the fractional cell, giving 40 distinct states across a life where the dial had 5. It
+# moves about once a year instead of once a decade.
+EIGHTHS = "▏▎▍▌▋▊▉█"  # U+258F..U+2588, 1/8 through 8/8
+BAR_CELLS = 5
 
 
-def dial(pct: float) -> str:
-    """The fill glyph for a percentage-spent, nearest quarter."""
-    return next(g for threshold, g in DIAL if pct < threshold)
+def bar(pct: float, cells: int = BAR_CELLS) -> str:
+    """A metric-native progress bar, precise to an eighth of a cell."""
+    exact = max(0.0, min(100.0, pct)) / 100 * cells
+    whole = int(exact)
+    eighth = int((exact - whole) * 8)
+    part = EIGHTHS[eighth - 1] if eighth else ""
+    return ("█" * whole + part).ljust(cells, "░")
 
 
 def fmt_default(s: dict) -> str:
@@ -131,7 +140,7 @@ def fmt_default(s: dict) -> str:
 
 
 def fmt_statusline(s: dict) -> str:
-    return f"{dial(s['pct_spent'])} {s['years_left']}y {s['days_remainder']}d · {s['pct_spent']}%"
+    return f"{bar(s['pct_spent'])} {s['years_left']}y {s['days_remainder']}d · {s['pct_spent']}%"
 
 
 def fmt_long(s: dict) -> str:
