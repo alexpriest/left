@@ -1,6 +1,14 @@
 # left
 
-How much time is left.
+How much of your life is left, as a daily number and a line in your terminal statusline.
+
+## Status
+
+Shipped — a daily number and a terminal statusline.
+
+## License
+
+Not licensed for reuse.
 
 From the 2026-08-05 voice memo: the `Left` app's death countdown landed hard —
 *"almost halfway. Which is rude. And a little bit of a wake-up call."* — and
